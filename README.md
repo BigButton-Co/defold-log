@@ -92,8 +92,12 @@ In the `[log]` configuration section for `game.project`, the `info_block` and `m
 
 #### Output Prefabs
 
-**Info:** `%levelname[%logger]`
-**Message:** `%space%message: %context %tab<%function>`
+```ini
+[log]
+info_block = %levelname[%logger]
+message_block = %space%message: %context %tab<%function>
+```
+
 **Preview:**
 
 ```
@@ -102,8 +106,12 @@ DEBUG:[game.logger     ] Debug message: {debug: message, value: 2} 	<example/exa
 
 ---
 
-**Info:** `%levelname| %time_tracking | %memory_tracking | %logger`
-**Message:** `| %tab%message: %context %tab<%function>`
+```ini
+[log]
+info_block = %levelname| %time_tracking | %memory_tracking | %logger
+message_block = | %tab%message: %context %tab<%function>
+```
+
 **Preview:**
 
 ```
@@ -194,6 +202,10 @@ logger:debug(message, [data])
 logger:info(message, [data])
 logger:warn(message, [data])
 logger:error(message, [data])
+
+-- There is short version of this
+local logger = require("log.log")()
+local logger = require("log.log")([name], [level])
 ```
 
 ### Setup and Initialization

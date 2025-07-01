@@ -1,8 +1,11 @@
 local log = require("log.log")
 
-local logger = log.get_logger("game.logger")
-local logger_two = log.get_logger("game.logger_two")
 
+local logger = log.get_logger("game.example")
+local logger_two = log.get_logger("game.example2", "WARN")
+
+local logger_short = require("log.log")("game.short1")
+local logger_short_level = require("log.log")("game.short2", "WARN")
 
 local function expensiveOperation()
 	for index = 1, 1000000 do
@@ -12,6 +15,26 @@ end
 
 
 function init(self)
+	log:trace("trace", { key = "value" })
+	log:info("info", { key = "value" })
+	log:debug("debug", { key = "value" })
+	log:warn("warn", { key = "value" })
+	log:error("error", { key = "value" })
+
+	logger_short:trace("trace", { key = "value" })
+	logger_short:info("info", { key = "value" })
+	logger_short:debug("debug", { key = "value" })
+	logger_short:warn("warn", { key = "value" })
+	logger_short:error("error", { key = "value" })
+
+	logger_short_level:trace("trace", { key = "value" })
+	logger_short_level:info("info", { key = "value" })
+	logger_short_level:debug("debug", { key = "value" })
+	logger_short_level:warn("warn", { key = "value" })
+	logger_short_level:error("error", { key = "value" })
+
+	----
+
 	logger:trace("init")
 
 	logger:debug("Debug message", {
