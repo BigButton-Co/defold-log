@@ -22,10 +22,10 @@
 
 Open your `game.project` file and add the following line to the dependencies field under the project section:
 
-**[Log](https://github.com/Insality/defold-log/archive/refs/tags/5.zip)**
+**[Log](https://github.com/Insality/defold-log/archive/refs/tags/6.zip)**
 
 ```
-https://github.com/Insality/defold-log/archive/refs/tags/5.zip
+https://github.com/Insality/defold-log/archive/refs/tags/6.zip
 ```
 
 ### Library Size
@@ -92,8 +92,12 @@ In the `[log]` configuration section for `game.project`, the `info_block` and `m
 
 #### Output Prefabs
 
-**Info:** `%levelname[%logger]`
-**Message:** `%space%message: %context %tab<%function>`
+```ini
+[log]
+info_block = %levelname[%logger]
+message_block = %space%message: %context %tab<%function>
+```
+
 **Preview:**
 
 ```
@@ -102,8 +106,12 @@ DEBUG:[game.logger     ] Debug message: {debug: message, value: 2} 	<example/exa
 
 ---
 
-**Info:** `%levelname| %time_tracking | %memory_tracking | %logger`
-**Message:** `| %tab%message: %context %tab<%function>`
+```ini
+[log]
+info_block = %levelname| %time_tracking | %memory_tracking | %logger
+message_block = | %tab%message: %context %tab<%function>
+```
+
 **Preview:**
 
 ```
@@ -174,6 +182,10 @@ https://github.com/d954mas/defold-utf8/archive/master.zip
 
 The Log module automatically detects the presence of the native UTF8 extension and uses it if available. If the extension is not present, the Log module will use the built-in Lua string functions.
 
+### Default view
+
+![Default view](media/logs_example.png)
+
 ## API Documentation
 
 ### Quick API Reference
@@ -194,6 +206,10 @@ logger:debug(message, [data])
 logger:info(message, [data])
 logger:warn(message, [data])
 logger:error(message, [data])
+
+-- There is short version of this
+local logger = require("log.log")()
+local logger = require("log.log")([name], [level])
 ```
 
 ### Setup and Initialization
@@ -388,6 +404,28 @@ To contribute, please look for issues tagged with `[Contribute]`, solve them, an
 - Removed time and memory tracking options from `game.project`
 	- Now it's possible to use `%time_tracking` and `%memory_tracking` placeholders in `info_block` to track time and memory usage.
 	- For time tracking with chronos extension, use the `%chronos_tracking` placeholder.
+
+### **V6**
+- Add shortcuts to create logger instance:
+```lua
+local log = require("log.log")
+local logger = log.get_logger("name")
+local logger = log.get_logger("name", "TRACE")
+
+local logger = require("log.log")()
+local logger = require("log.log")("name")
+local logger = require("log.log")("name", "TRACE")
+```
+- Add auto-name for loggers from log.* interface, it will match the file name of the current script.
+So now the shortest way to use log module is:
+```lua
+local log = require("log.log")
+
+log:trace("Hello, world!", { key = "value" })
+log:info("Hello, world!")
+log:erro("Hello, world!")
+```
+
 </details>
 
 

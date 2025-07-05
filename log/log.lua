@@ -17,6 +17,7 @@ local IS_MOBILE = SYSTEM_NAME == "iPhone OS" or SYSTEM_NAME == "Android"
 local DEFAULT_LEVEL = IS_DEBUG and "TRACE" or "ERROR"
 local GAME_LOG_LEVEL = sys.get_config_string(IS_DEBUG and "log.level" or "log.level_release", DEFAULT_LEVEL)
 
+local AUTO_NAME = "log_auto_name"
 local LOGGER_BLOCK_WIDTH = sys.get_config_int("log.logger_block_width", 14)
 local MAX_LOG_LENGTH = sys.get_config_int("log.max_log_length", 1024)
 local INSPECT_DEPTH = sys.get_config_int("log.inspect_depth", 1)
@@ -181,7 +182,12 @@ function M:format(level, message, context)
 	if IS_FORMAT_LOGGER then
 		-- Make logger name length equal to LOGGER_BLOCK_WIDTH
 		local name_to_insert = self.name
-		local logger_name_length = string_m.len(self.name)
+
+		if name_to_insert == AUTO_NAME then
+			name_to_insert = M.get_default_logger_name(debug.getinfo(4, "S"))
+		end
+
+		local logger_name_length = string_m.len(name_to_insert)
 		if logger_name_length < LOGGER_BLOCK_WIDTH then
 			name_to_insert = name_to_insert .. string.rep(" ", LOGGER_BLOCK_WIDTH - logger_name_length)
 		elseif logger_name_length > LOGGER_BLOCK_WIDTH then
@@ -312,7 +318,7 @@ end
 ---@return logger
 function M.get_logger(logger_name, force_logger_level_in_debug)
 	local instance = {
-		name = logger_name or M.get_default_logger_name(),
+		name = logger_name or M.get_default_logger_name(debug.getinfo(2, "S")),
 		level = force_logger_level_in_debug or GAME_LOG_LEVEL,
 	}
 
@@ -334,23 +340,32 @@ function M.get_logger(logger_name, force_logger_level_in_debug)
 		end
 	end
 
-	return setmetatable(instance, { __index = M }) --[[@as logger]]
+	return setmetatable(instance, { __index = M })
 end
 
 
+local SOURCE_TO_NAME_MAP = {}
 ---Return the basename of the current file
-function M.get_default_logger_name()
-	local current_script_path = debug.getinfo(3).short_src
-	-- Extract basename
+---@param debuginfo debuginfo
+---@return string
+function M.get_default_logger_name(debuginfo)
+	local current_script_path = debuginfo.short_src
+
+	if SOURCE_TO_NAME_MAP[current_script_path] then
+		return SOURCE_TO_NAME_MAP[current_script_path]
+	end
+
 	local basename = string.match(current_script_path, "([^/\\]+)$")
-	-- Remove extension
 	basename = string.match(basename, "(.*)%..*$")
+	SOURCE_TO_NAME_MAP[current_script_path] = basename
 	return basename
 end
 
 
-local PROJECT_TITLE = sys.get_config_string("project.title", "log")
-local DEFAULT_LOGGER = M.get_logger(PROJECT_TITLE)
+local DEFAULT_LOGGER = M.get_logger(AUTO_NAME)
 return setmetatable(M, {
 	__index = DEFAULT_LOGGER,
+	__call = function(self, name, force_logger_level_in_debug)
+		return M.get_logger(name, force_logger_level_in_debug)
+	end
 })
